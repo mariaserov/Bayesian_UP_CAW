@@ -1,0 +1,187 @@
+
+
+# 1 - Set up
+
+```{r}
+# 1 - Check the coordinates & min distances between polygons:
+
+#st_coordinates(st_centroid(carto_up)) # these appear to be latitudes & longitudes
+coord <- st_coordinates(st_centroid(carto_up))
+dists <- spDists(coord)
+#min(dists[dists > 0]) # min distance is 0.309
+
+# 2- define neihbours list & convert to adjacency matrix
+
+carto_up$reid <- carto_up$ID_area
+carto_up_nb <- poly2nb(carto_up, snap=0.001, queen=TRUE) #  snap=0.01 seems the most accurate geographically
+summary(carto_up_nb)
+nb2INLA("map_adj",carto_up_nb) # create object with the location of the graph
+adj = inla.read.graph(filename="map_adj") # store graph
+
+
+```
+
+# 2 - spatial model
+```{r}
+
+# create dataset collaped across time
+up_agg <- data %>% group_by(ID_area) %>% # aggregate over areas 
+  summarise(O = sum(dowry), E = sum(e_dowry)) %>% # compute obs & expected
+  mutate(SMR=O/E) # compute SMRs per area
+
+# fit hierarchical poisson log-linear model
+ID <- seq(1,70)
+f_BYM2 <- O ~ f(ID, model="bym2", graph=adj,
+                      hyper=list(
+                        prec=list(prior = "pc.prec", param = c(0.5 / 0.31, 0.01)),
+                        phi=list(prior="pc", param=c(0.5,2/3))
+                      ))
+
+s_model = inla(formula=f_BYM2, family="poisson", data=up_agg, E=E, 
+               control.predictor = list(compute=TRUE), 
+               control.compute = list(waic=TRUE))
+
+```
+
+Obtain posterior summary statistics
+
+```{r}
+
+# RRs
+RR_s <- c()
+for(i in 1:70) {
+  RR_s[i] <- inla.emarginal(function(x) exp(x), s_model$marginals.random$ID[[i]])}
+
+# Posterior probabilities
+
+RR_s_marg <- s_model$marginals.random$ID[1:70]
+PP_s <- lapply(RR_s_marg, function(x) {1-inla.pmarginal(0,x)})
+
+s_RR_PP <- data.frame(resRR=RR_s, PP=unlist(PP_s), SP_ID=up_agg[,1])
+```
+
+Plot results
+
+```{r, fig.width=12, fig.height=6}
+breaks = c(min(s_RR_PP$resRR), 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2, max(s_RR_PP$resRR))
+s_RR_PP$resRR_Cat = cut(s_RR_PP$resRR, breaks=breaks, include.lowest = TRUE)
+breaks_pp = c(0, 0.2, 0.8, 1.00)
+s_RR_PP$PP_cat = cut(s_RR_PP$PP, breaks_pp, include.lowest = TRUE)
+map_s_RR_PP=left_join(carto_up, s_RR_PP, by=c("ID_area"="ID_area"))
+
+map1_s = ggplot() + geom_sf(data=map_s_RR_PP) + aes(fill=resRR_Cat) + theme_bw() +
+  scale_fill_brewer(palette = "PuOr") + guides(fill=guide_legend(title="RR")) + ggtitle("RR Spatial model") +
+    theme(text = element_text(size=15), 
+                  axis.text.x = element_blank(), 
+                  axis.text.y = element_blank(), plot.title = element_text(size = 12, face = "bold"))
+
+map2_s = ggplot() + geom_sf(data=map_s_RR_PP) + aes(fill=PP_cat) + theme_bw() +
+    scale_fill_viridis(
+    option = "plasma", name="PP",
+    discrete = T,
+    direction = -1,
+    guide = guide_legend(
+      title.position = 'top',
+      reverse = T
+    )) +  ggtitle("PP Spatial model") + theme(text = element_text(size=15), 
+                  axis.text.x = element_blank(), 
+                  axis.text.y = element_blank(), plot.title = element_text(size = 12, face = "bold")) 
+
+map1_s | map2_s
+
+
+```
+Discussion: it seems that there is some clear spatial structure.
+
+Get hyperparameter values
+
+```{r}
+s_model$summary.hyperpar
+```
+Discussion: majority (89%) of the spatial variability is explained by the spatially structured component, which is also supported by the visual assessment of the map.
+
+# 2 - spatio-temporal model
+
+```{r}
+# Prep data 
+data_st = left_join(carto_up, data, by = "ID_area")
+data_st = data_st %>% dplyr::rename(O=dowry, E=e_dowry)
+
+# Define & fit the model
+
+formula_st = O ~ f(ID_area, model="bym2", graph=adj, hyper=list(
+                        prec=list(prior = "pc.prec", param = c(0.5 / 0.31, 0.01)),
+                        phi=list(prior="pc", param=c(0.5,2/3))
+                      )) + 
+  f(ID_year, model="rw1", hyper=list(prec=list(prior="pc.prec", param=c(0.5/0.31, 0.01))))
+
+st_model = inla(formula=formula_st, family="poisson", data=data_st, E=E, control.compute=list(waic=TRUE), 
+                control.predictor = list(compute=TRUE))
+
+```
+
+Plot the temporal residual RRs
+
+```{r}
+# derive posterior temporal RRs & CIs
+RR_stRW_RR = c()
+RR_stRW_l = c()
+RR_stRW_h = c()
+
+for(i in 1:14) {
+  RR_stRW_RR[i] = inla.emarginal(function(x) exp(x), st_model$marginals.random$ID_year[[i]])
+  RR_stRW_l[i] = inla.qmarginal(0.025,inla.tmarginal(function(x) exp(x), st_model$marginals.random$ID_year[[i]]))
+  RR_stRW_h[i] = inla.qmarginal(0.975,inla.tmarginal(function(x) exp(x), st_model$marginals.random$ID_year[[i]]))
+}
+
+RR_stRW = data.frame(RR=RR_stRW_RR, low_CI=RR_stRW_l, up_CI = RR_stRW_h)
+
+# Plot temporal residual RRs
+
+temp1 = ggplot(RR_stRW, aes(seq(2001,2014), RR)) + geom_line() + ggtitle("ST model (no interactions)") + theme_bw() +
+  geom_ribbon(aes(ymin=low_CI,ymax=up_CI), alpha=0.2) + labs(x="year")
+
+temp1
+```
+
+map the spatial residual RRs & exceedance probabilities
+
+```{r, fig.width=12, fig.height=6}
+# derive spatial posterior means (RR) & exceedance probabilities
+
+RR_stBYM = c()
+for(i in 1:70) {RR_stBYM[i] = inla.emarginal(function(x) exp(x), st_model$marginals.random$ID_area[[i]])} ##
+RR_stBYM_marg = st_model$marginals.random$ID_area[1:70]
+PP_stBYM = lapply(RR_stBYM_marg, function(x) {1-inla.pmarginal(0,x)})
+
+resRR_PP_st = data.frame(RR=RR_stBYM, PP=unlist(PP_stBYM), ID_area=up_agg[,1])
+
+# plot 
+breaks = c(min(resRR_PP_st$RR), 0.6, 0.8, 1, 1.2, 1.4, 1.6, 1.8, 2, max(resRR_PP_st$RR))
+resRR_PP_st$RR_cat = cut(resRR_PP_st$RR, breaks=breaks, include.lowest = TRUE)
+breaks_pp = c(0, 0.2, 0.8, 1.00)
+resRR_PP_st$PP_cat = cut(resRR_PP_st$PP, breaks_pp, include.lowest = TRUE)
+map_st_RR_PP=left_join(carto_up, resRR_PP_st, by=c("ID_area"="ID_area"))
+
+map1_st = ggplot() + geom_sf(data=map_st_RR_PP) + aes(fill=RR_cat) + theme_bw() +
+  scale_fill_brewer(palette = "PuOr") + guides(fill=guide_legend(title="RR")) + ggtitle("RR Spatio-temporal model") +
+    theme(text = element_text(size=15), 
+                  axis.text.x = element_blank(), 
+                  axis.text.y = element_blank(), plot.title = element_text(size = 12, face = "bold"))
+
+map2_st = ggplot() + geom_sf(data=map_st_RR_PP) + aes(fill=PP_cat) + theme_bw() +
+    scale_fill_viridis(
+    option = "plasma", name="PP",
+    discrete = T,
+    direction = -1,
+    guide = guide_legend(
+      title.position = 'top',
+      reverse = T
+    )) +  ggtitle("PP Spatio-temporal model") + theme(text = element_text(size=15), 
+                  axis.text.x = element_blank(), 
+                  axis.text.y = element_blank(), plot.title = element_text(size = 12, face = "bold")) 
+
+map1_st | map2_st
+
+
+```
