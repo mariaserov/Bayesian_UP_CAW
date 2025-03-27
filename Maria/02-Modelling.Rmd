@@ -231,7 +231,7 @@ temp1 | temp2
 
 RR_st_int_BYM = c()
 for(i in 1:70) {RR_st_int_BYM[i] = inla.emarginal(function(x) exp(x), 
-                                                  st_int_model$marginals.random$ID_area[[i]])} ##
+                                                  st_int_model$marginals.random$ID_area[[i]])} 
 RR_st_intBYM_marg = st_int_model$marginals.random$ID_area[1:70]
 PP_st_int_BYM = lapply(RR_st_intBYM_marg, function(x) {1-inla.pmarginal(0,x)})
 
@@ -270,7 +270,7 @@ Comment: it seems like there is very little difference in spatial residuals. Som
 
 Now plotting space-time interaction
 
-```{r}
+```{r, fig.width=12, fig.height=12}
 data_st$int = st_int_model$summary.random$ID_area_year$mean
 data_st$int_cat = cut(data_st$int,  breaks=c(-1,-0.05, 
                   -0.01, 0.01, 0.05, 1),include.lowest = T)
@@ -282,7 +282,62 @@ ggplot() + geom_sf(data = data_st, aes(fill=int_cat)) + theme_bw() +
         axis.text.x = element_blank(), axis.text.y = element_blank()) +
 facet_wrap(~ year, ncol = 4, labeller=labeller(ID_year=c("1"="2001","2"="2002","3"="2003","4"="2004","5"="2005",
                             "6"="2006","7"="2007","8"="2008","9"="2009","10"="2010",
-                            "11"="2011","12"="2012","13"="2013", "14"="2014"))) +
+                            "11"="2011","12"="2012","13"="2013","14"="2014"))) +
 labs("")
+```
+
+```{r}
+dat.hyper2 = 
+  round(
+  data.frame(median = st_int_model$summary.hyperpar[,4],
+    LL = st_int_model$summary.hyperpar[,3], 
+    UL = st_int_model$summary.hyperpar[,5]),
+  digits = 3)
+
+row.names(dat.hyper2) = 
+  rownames(st_int_model$summary.hyperpar)
+
+knitr::kable(dat.hyper2, caption = "Posterior median and 95% CrI of hyperparameters") %>%  kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
+```
+
+```{r}
+dat.WAIC = data.frame(model = c("Spatial", "SpatTemp no int", "SpatTemp typeI"), 
+                       WAIC = round(c(s_model$waic$waic, st_model$waic$waic, st_int_model$waic$waic))
+)
+
+row.names(dat.WAIC) = NULL
+
+knitr::kable(dat.WAIC, caption = "WAIC of the fifferent models") %>%  kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
+```
+
+Mapping total linear predictor 
+
+```{r, fig.width=12, fig.height=12}
+
+data_st$RR_total_emarg <- mapply(function(area_idx, year_idx, area_year_idx) {
+  rr_area <- inla.emarginal(function(x) exp(x), st_int_model$marginals.random$ID_area[[area_idx]])
+  rr_year <- inla.emarginal(function(x) exp(x), st_int_model$marginals.random$ID_year[[year_idx]])
+  rr_interaction <- inla.emarginal(function(x) exp(x), st_int_model$marginals.random$ID_area_year[[area_year_idx]])
+  
+  rr_area * rr_year * rr_interaction
+},
+area_idx = data_st$ID_area,
+year_idx = data_st$ID_year,
+area_year_idx = data_st$ID_area_year)
+
+
+breaks_total = c(min(data_st$RR_total_emarg), 0.5, 1, 1.5, 2, 2.5, max(data_st$RR_total_emarg))
+data_st$RR_total_cat = cut(data_st$RR_total_emarg,  breaks=breaks_total,include.lowest = T)
+
+ggplot() + geom_sf(data = data_st, aes(fill = RR_total_cat)) + theme_bw() + scale_fill_brewer(palette = "PuOr") +
+  guides(fill=guide_legend(title=NULL)) +
+  theme(text = element_text(size=20),
+        axis.text.x = element_blank(), axis.text.y = element_blank()) +
+facet_wrap(~ year, ncol = 5, labeller=labeller(ID_year=c("1"="2001","2"="2002","3"="2003","4"="2004","5"="2005",
+                            "6"="2006","7"="2007","8"="2008","9"="2009","10"="2010",
+                            "11"="2011","12"="2012","13"="2013","14"="2014"))) +
+labs(title = "Posterior Mean Relative Risks of Dowry Deaths")
+
+
 ```
 
