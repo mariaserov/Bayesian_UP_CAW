@@ -64,7 +64,7 @@ year_agg <- data %>% group_by(year) %>% summarise(rape_obs = sum(rape),
 View(year_agg)
 ```
 
-```{r}
+```{r, fig.width=10, fig.height=12}
 # Visualise summary stats - crude rates
 
 year_agg_vis <- year_agg %>% mutate(
@@ -77,8 +77,10 @@ year_agg_vis <- year_agg %>% mutate(
   'Lowest Dowry' = paste0(min_rape_region, " (", round(min_dowry_rate, 1), ")") ) %>% 
   select( 'Year', 'Rape', 'Dowry', 'Higest Rape', 'Lowest Rape', 'Highest Dowry', 'Lowest Dowry')
 
-knitr::kable(year_agg_vis, caption = "Yearly summary of crude crime rates (per 100,000 women)") %>%
+reg_table <- knitr::kable(year_agg_vis, caption = "Yearly summary of crude crime rates (per 100,000 women)") %>%
   kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
+
+save_kable(reg_table, file = "reg_table.png")
 
 ```
 
