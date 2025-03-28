@@ -1,0 +1,173 @@
+---
+title: "Bayesian Spatio-Temporal modelling of crime against women in Uttar Pradesh"
+author: "Wanqing Fang, Ben Ling, Maria Serova, Yi Zhou"
+date: "31/03/2025"
+output: 
+  pdf_document: default
+  html_document:
+    fig_caption: true
+always_allow_html: true
+header-includes: \usepackage{bm}
+bibliography: biblio.bib
+abstract: Include your Abstract here. This should be an unstructured abstract of 200
+  words, summarising the main contents of the scientific report.
+editor_options:
+  markdown:
+    wrap: sentence
+---
+
+```{=tex}
+\pagenumbering{gobble} 
+\pagenumbering{arabic}
+```
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE, fig.align = "center", class.source='klippy')
+```
+
+```{r klippy, echo=FALSE, include=TRUE}
+klippy::klippy(position = c('top', 'right'),color = 'darkred',
+               tooltip_message = 'Click to copy', tooltip_success = 'Done')
+```
+
+```{r eval=TRUE, echo=FALSE}
+# Load the libraries 
+library(dplyr)        
+library(sf)           
+library(spdep)        
+library(tidyr)        
+library(INLA)         
+library(ggplot2)      
+library(viridis)    
+library(patchwork)    
+library(knitr)
+library(kableExtra)
+
+# Prepare directory and data
+#rm(list=ls())
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+load("../../CrimeUttarPradesh.RData")
+```
+
+```{r}
+
+```
+
+# Introduction
+
+This section should convey two key pieces of information: the background information necessary to place the scientific report in context, and the clear and complete specification of the purpose(s).
+In particular, think about:
+
+-   What is known about the subject
+
+-   What is not know
+
+-   Why is it important to fill this research gap
+
+-   What is exactly the research question
+
+To include citations, please refers to the practicals used in our module and the file of the Instructions.
+
+# Methods
+
+-   This section should describe:
+
+(1) the study design,
+(2) the data used,
+(3) how these data are analysed.
+
+-   Feel free to include subsections.
+
+-   To include equations, you can refer to the R-Markdown files used during the Sessions and practicals.
+
+-   Being this scientific mini-project report structured as a paper, you should not print the R code here.
+    However, you are asked to specify the entire R code as embedded in the report or as supplementary material, so that the reproducibility of your results can be assessed.
+
+-   In the global chunk options of this template, we set (`echo=TRUE`) so the code will shown in the final document.
+    If you need to change it, you can modify the option in the initial line of each code chunks, or directly in global chunk options.
+    Examples are provided in all our Practicals.
+    Here some further examples:
+
+# Results
+
+## Descriptive analysis
+
+Between 2001 and 2014, the total number of reported rape cases and dowry deaths was 25,513 and 28,600, respectively, with the corresponding yearly means of 2,043 (±334) and 1,822 (±691).
+Several districts frequently exhibited the highest yearly rates, such as Philibit and Chitrakoot (rape) and Alogarh (dowry deaths).
+In contrast, Sant Ravidas Nagar Bhadohi frequently had the lowest rates of both crimes (Supp Table 1).
+Temporal evolutions of unsmoothed standardised mortality ratios (SMRs) reveal a general increase in both crimes from 2003, stabilising for dowry deaths after 2008, and increasing sharply for rape from 2010 onwards.
+District-level trajectories (Supp.fig.X) show substantial variability, motivating the use of spatio-temporal smoothing and interaction terms.
+Spatially aggregated unsmoothed SMRs reveal a gradient of increasing crime rates towards the West of the region.
+This spatial patterning further motivates the use of smoothing models to enable strength borrowing from neighbours, hence producing higher confidence risk estimates.
+
+```{r EDA-figure, , fig.width=15, fig.height=4}
+# Plot data
+load("plots/unsmoothedSMRs.RData")
+usmoothed_map | unsmoothed_smr_map
+```
+
+## Model comparison
+
+We fit spatial (S), spatio-temporal (ST), and spatio-temporal with Interaction Type I (ST+I) model for each crime type.
+All three models captured similar spatial clusters of elevated and lower risks and corresponding exceedance probabilities.
+The S and ST models yielded similar smoothed maps of posterior spatial RRs (Supplementary Figure X).
+Including an interaction term enabled identification of several regions of higher risk and higher exceedance probabilities for both crimes.
+Furthermore, the ST+I model yielded lower WAIC for both crimes compared to the ST model, indicating a better fit (S model was not included in this comparison as it was fit on aggregate data).
+It was therefore deemed the most appropriate model.
+
+## Spatial effects
+
+The district-specific posterior means of spatial relative risks (RRs) (column 1) and corresponding exceedance probabilities (column 2) for both rapes and dowry deaths are shown in figure X.
+For dowry deaths, a gradient of increasing risk from East to West is apparent.
+A pronounced high-risk cluster can be observed in the South-Western districts, particularly concentrated around Etah and Mainpuri.
+This is corroborated by the high exceedance probabilities (0.8-1) in this area.
+In contrast, the Eastern and North-Western regions predominantly exhibit lower RRs and exceedance probabilities.
+
+These patterns are largely mirrored by rape RRs, with the Eastern area also exhibiting lower risk.
+However, the spatial pattern of higher risk is more dispersed, with two clusters identified in the South and North-West, concentrated around Bulandshahr and Chitrakoot.
+Additionally, the rape RRs exhibit a wider range (0.294-2.28) compared to dowry death RRs (0.423-2.1).
+
+This is corroborated by the precision hyperparameter of the spacial component (BYM2) of the two models, with lower precision (and hence higher variance) in rape model indicating greater spatial variability of rape (Table X).
+The posterior precision hyperparameters of temporal and interaction components are higher than that of spatial effects in both models, indicating that spatial effects explained most of the variability of posterior RRs.
+Furthermore, the high value of phi hyperparameter of both models shows that most of the spatial variation is structured.
+
+## Temporal and spatio-temporal effects
+
+The temporal trajectories of posterior risk means (Figure X) are largely similar between the ST and the ST+I models for both crimes, with wider CIs of the ST+I model accounting for district-specific temporal trajectories.
+For dowry deaths, the overall temporal trend is relatively flat, dropping in 2003 before stabilising around 1.
+The temporal trend of rapes is much sharper, exhibiting a more pronounced drop in 2003, and a much steeper rise afterwards, particularly after 2010.
+This is also reflected in the posterior precision hyperparameter, which is notably lower in the rape model than the dowry model, indicating a higher temporal variability of rapes.
+The ST+I model includes both the national temporal trends and the region-specific deviations, with the residual RRs of interaction term capturing how each region’s temporal pattern differs from the overall trend (supplementary figure X).
+There are no notable patterns in interaction effects for dowry deaths.
+For rape, distinct low (dark orange) or high (dark-blue) clusters can be observed, indicating district-specific temporal effects.
+
+## Overall dynamics of posterior mean relative risks
+
+Posterior mean RRs of the ST+I model, combining spatial, temporal, and spatio-temporal components, and hence capturing geographical and temporal dynamics, are shown for both crimes in figure X.
+For both, there is a noticeable decline in risk leading up to 2003, particularly concentrated in the eastern part of the region and especially pronounced for rape.
+Following this decline, dowry death risks experience a mild resurgence before stabilising.
+In contrast, rape risks increase more markedly across most of the region, and again more strongly in the east.
+By the end of the study period, several districts exhibit posterior RRs in the range of 2.5 to 4.75, indicating significantly elevated risk relative to regional baseline.
+
+# Discussion and conclusion
+
+This section should synthetically discuss your answer to the research question and how your findings compare or contrast with previous results.
+You can refer to the potential implications and future perspectives and/or application of present work.
+Think about:
+
+-   Your key results
+
+-   What your study adds
+
+-   Comparison with existing literature/interpretation of findings
+
+-   Strength and weakness of your study
+
+-   Recommendation for future research and/or for policies
+
+# Supplementary material
+
+# References
+
+-   You should update the attached file `biblio.bib` with your references.
+
+-   The references cited in the mini-project report will be automatically inserted after this header.

@@ -854,4 +854,71 @@ ggplot(hyper_df, aes(x = Model, y = mean, color = Crime, group = Crime)) +
   theme(axis.text.x = element_text(angle = 45, hjust = 1))
 ```
 
+### hyperparameter table
+
+```{r}
+rape_hyper <- as.data.frame(st_int_model_rape$summary.hyperpar)
+dowry_hyper <- as.data.frame(st_int_model_dowry$summary.hyperpar)
+
+# 2. Clean / Rename Columns for Clarity
+# Typically, you have columns like "mean", "sd", "0.025quant", "0.975quant", etc.
+rape_hyper <- rape_hyper %>%
+  mutate(Parameter = rownames(rape_hyper),
+         CrimeType = "Rape") %>%
+  select(Parameter, mean, `0.025quant`, `0.975quant`, CrimeType)
+
+dowry_hyper <- dowry_hyper %>%
+  mutate(Parameter = rownames(dowry_hyper),
+         CrimeType = "Dowry Deaths") %>%
+  select(Parameter, mean, `0.025quant`, `0.975quant`, CrimeType)
+
+# Combine into a single data frame
+hyper_combined <- bind_rows(rape_hyper, dowry_hyper)
+
+# 3. Create a Nice Table
+# This example shows a side-by-side listing of parameter, mean, and credible intervals
+# for each crime type.
+
+hyper_table <- hyper_combined %>%
+  mutate(
+    # Format the credible interval as a single string
+    CrI = paste0("(", round(`0.025quant`, 3), ", ", round(`0.975quant`, 3), ")"),
+    Mean = round(mean, 3)
+  ) %>%
+  select(CrimeType, Parameter, Mean, CrI)
+
+# 1. Pivot to wide format
+hyper_wide <- hyper_combined %>%
+  pivot_wider(
+    id_cols = Parameter,
+    names_from = CrimeType,              # Rape vs. Dowry Deaths
+    values_from = c(mean, `0.025quant`, `0.975quant`),
+    names_glue = "{CrimeType}_{.value}"  # to create columns like Rape_mean, Dowry Deaths_mean, etc.
+  )
+
+# 2. Create columns that combine the mean and 95% CrI into one string
+hyper_wide <- hyper_wide %>%
+  mutate(
+    Rape_Est = paste0(
+      round(Rape_mean, 3), 
+      " (", round(Rape_0.025quant, 3), ", ", round(Rape_0.975quant, 3), ")"
+    ),
+    Dowry_Est = paste0(
+      round(`Dowry Deaths_mean`, 3), 
+      " (", round(`Dowry Deaths_0.025quant`, 3), ", ", round(`Dowry Deaths_0.975quant`, 3), ")"
+    )
+  ) %>%
+  # 3. Select and rename columns for clarity
+  select(
+    Parameter,
+    `Rape: Mean (95% CrI)` = Rape_Est,
+    `Dowry Deaths: Mean (95% CrI)` = Dowry_Est
+  )
+
+# 4. Create a publication-ready table
+kable(hyper_wide, "html", caption = "Posterior Summaries of Hyperparameters") %>%
+  kable_styling(full_width = FALSE)
+
+```
+
 
