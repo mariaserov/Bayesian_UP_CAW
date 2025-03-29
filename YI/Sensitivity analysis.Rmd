@@ -1,0 +1,160 @@
+---
+output:
+  html_document: default
+  pdf_document: default
+---
+```{r eval=TRUE, echo=FALSE,message=FALSE, warning=FALSE}
+# Load the libraries you will use for the mini-project report
+library(dplyr)        # A package for data manipulation
+library(sf)           # Simple feature for R
+library(spdep)        # Functions and tests for evaluating spatial patterns 
+library(tidyr)        # Tools to create tidy data
+library(INLA)         # Integrated Nested Laplace Approximation package
+library(ggplot2)      # A package for creating maps and graphs
+library(viridis)      # A package providing color palettes 
+library(patchwork)    # A package to compose plots
+
+# For tables in RMarkdown
+library(knitr)
+library(kableExtra)
+library(sp)
+```
+
+
+```{r eval=TRUE, echo=FALSE,include=FALSE,message=FALSE, warning=FALSE}
+load("/Users/zyy/Desktop/Bayesian project/CrimeUttarPradesh.RData")
+carto_up <- st_as_sf(carto_up)
+# 1 - Check the coordinates & min distances between polygons:
+
+#st_coordinates(st_centroid(carto_up)) # these appear to be latitudes & longitudes
+coord <- st_coordinates(st_centroid(carto_up))
+dists <- spDists(coord)
+#min(dists[dists > 0]) # min distance is 0.309
+
+# 2- define neihbours list & convert to adjacency matrix
+
+carto_up$reid <- carto_up$ID_area
+carto_up_nb <- poly2nb(carto_up, snap=0.001, queen=TRUE) #  snap=0.01 seems the most accurate geographically
+summary(carto_up_nb)
+nb2INLA("map_adj",carto_up_nb) # create object with the location of the graph
+adj = inla.read.graph(filename="map_adj") # store graph
+
+data_st_rape = left_join(carto_up, data, by = "ID_area")
+data_st_rape = data_st_rape %>% dplyr::rename(O=rape, E=e_rape)
+data_st_dowry = left_join(carto_up, data, by = "ID_area")
+data_st_dowry = data_st_dowry %>% dplyr::rename(O=dowry, E=e_dowry)
+```
+
+
+
+```{r eval=TRUE, echo=TRUE, message=FALSE, warning=FALSE, results='hide'}
+# Function to fit the model with custom PC priors
+fit_st_model <- function(data, E, adj, u_val, alpha_val, phi_alpha) {
+  formula_custom = O ~ 
+    f(ID_area, model="bym2", graph=adj, 
+      hyper=list(
+        prec=list(prior="pc.prec", param=c(0.5/u_val, alpha_val)),
+        phi=list(prior="pc", param=c(0.5, phi_alpha))
+      )) + 
+    f(ID_year, model="rw1", 
+      hyper=list(prec=list(prior="pc.prec", param=c(0.5/u_val, alpha_val)))) + 
+    f(ID_area_year, model="iid", 
+      hyper=list(prec=list(prior="pc.prec", param=c(0.5/u_val, alpha_val))))
+  
+  model = inla(formula_custom, family="poisson", data=data, E=E, 
+               control.compute = list(dic = TRUE, waic = TRUE),
+               control.predictor = list(compute = TRUE))
+  
+  return(model)
+}
+
+# Define prior settings to test
+# Define prior settings to test (updated names)
+prior_settings = data.frame(
+  model_id = c("Base_PC", "Weaker_Shrinkage", "Stronger_Spatial"),
+  u_val = c(0.31, 0.5, 0.3),
+  alpha_val = c(0.01, 0.01, 0.05),
+  phi_alpha = c(2/3, 0.5, 0.8)
+)
+
+# Container for results
+results = data.frame()
+
+# Loop over models for Dowry and Rape
+for(crime in c("dowry", "rape")) {
+  data_input = if(crime == "dowry") data_st_dowry else data_st_rape
+  
+  for(i in 1:nrow(prior_settings)) {
+    cat("Running", crime, "model:", prior_settings$model_id[i], "\n")
+    
+    model = fit_st_model(
+      data = data_input,
+      E = E,
+      adj = adj,
+      u_val = prior_settings$u_val[i],
+      alpha_val = prior_settings$alpha_val[i],
+      phi_alpha = prior_settings$phi_alpha[i]
+    )
+    
+    # Extract hyperparameter summaries
+    hyp = model$summary.hyperpar
+    
+    results = rbind(
+      results,
+      data.frame(
+        Crime = crime,
+        Model = prior_settings$model_id[i],
+        DIC = model$dic$dic,
+        WAIC = model$waic$waic,
+        Prec_ID_area = hyp["Precision for ID_area", "mean"],
+        Phi_ID_area = hyp["Phi for ID_area", "mean"],
+        Prec_ID_year = hyp["Precision for ID_year", "mean"],
+        Prec_ID_area_year = hyp["Precision for ID_area_year", "mean"]
+      )
+    )
+  }
+}
+```
+
+```{r}
+kable(results, caption = "Sensitivity Analysis Results for Spatio-temporal Models with Interaction I")
+```
+
+To evaluate the robustness of the spatio-temporal models with Type I interaction to hyperprior assumptions, we conducted a sensitivity analysis using three different PC prior configurations for the precision parameters and the spatial mixing parameter ($\phi$) in the BYM2 model. The configurations included: 
+
+1. the default prior (**Base_PC**) with $U = 0.31$, $\alpha = 0.01$, and $P(\phi < 0.5) = \frac{2}{3}$,  
+2. a weakly informative prior (**Weaker_Shrinkage**) with $U = 0.5$, $\alpha = 0.01$, $P(\phi < 0.5) = 0.5$  
+3. a stronger spatial structure prior (**Stronger_Spatial**) with $U = 0.3$, $\alpha = 0.05$, and $P(\phi < 0.5) = 0.8$. 
+
+These settings were applied to both the dowry death and rape models, and model performance was assessed using the Deviance Information Criterion (DIC) and the Watanabe-Akaike Information Criterion (WAIC).
+
+For the dowry death model, all three prior settings yielded nearly identical results ($\Delta$DIC < 0.15; $\Delta$WAIC < 0.25), with consistently high values of the spatial structure parameter $\phi$ (approximately 0.89), indicating strong spatial dependence and low sensitivity to prior specification. The rape model also showed minimal variation in DIC and WAIC across the prior settings, with slightly lower $\phi$ values (around 0.84–0.86), reflecting weaker spatial structure. 
+
+Overall, the findings demonstrate that the spatio-temporal models are robust to reasonable variations in PC priors, and that the posterior inferences are primarily driven by the data rather than prior assumptions.
+
+```{r}
+knitr::opts_chunk$set(echo = TRUE)
+# Create the table data
+prior_settings <- data.frame(
+  Model = c("Base_PC", "Weaker_Shrinkage", "Stronger_Spatial"),
+  U = c(0.31, 0.5, 0.3),
+  Alpha = c(0.01, 0.01, 0.05),
+  Phi = c("2/3", "0.5", "0.8"),
+  Description = c(
+    "Original PC prior",
+    "Weaker shrinkage: allows more variance, favors less spatial structure",
+    "Stronger spatial structure: tighter σ, favors more spatial structure"
+  )
+)
+
+
+# Render nicely with borders
+kable(prior_settings, format = "html", escape = FALSE, align = "c",
+      caption = "Hyperprior Settings for Sensitivity Analysis") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive", "bordered"),
+                full_width = FALSE,
+                position = "center") %>%
+  column_spec(1:4, width = "8em") %>%
+  column_spec(5, width = "30em")
+```
+
