@@ -22,7 +22,9 @@ library(patchwork)    # A package to compose plots
 # For tables in RMarkdown
 library(knitr)
 library(kableExtra)
-load("../CrimeUttarPradesh.RData")
+#rm(list=ls())
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+load("../../CrimeUttarPradesh.RData")
 ```
 
 ### Temporal trends visualisation - SMR & crude rates
@@ -56,7 +58,7 @@ year_agg <- data %>% group_by(year) %>% summarise(rape_obs = sum(rape),
 
 # Visualise temporal trends of SMRs
 
-ggplot(year_agg, aes(x = year)) +
+usmoothed_map <- ggplot(year_agg, aes(x = year)) +
   geom_line(aes(y=SMR_rape, color = "Rape")) + 
   geom_line(aes(y=SMR_dowry, color = "Dowry")) + theme_minimal() +
   labs(title = "Temporal evolution of SMRs of Rape and Dowry Crime", 
@@ -112,9 +114,9 @@ p_rape <- ggplot() +
   labs(y = "Crude Rate of Rape", x = "Year") + 
   theme_minimal()
 
-(p_dowry | p_rape) +
+((p_dowry | p_rape) +
   plot_layout(guides = "collect") +
-  plot_annotation(title = "Crude Rates of Rape and Dowry Crime in Uttar Pradesh (2001–2014)")
+  plot_annotation(title = "Crude Rates of Rape and Dowry Crime in Uttar Pradesh (2001–2014)"))
 
 ```
 ### Map visualisation of SMRs & crude rates
@@ -150,7 +152,7 @@ map_rates_long_rate <- map_rates %>% # Making long-format data for rates
   )
 
 # Plot SMR
-ggplot(map_rates_long_SMR) +
+unsmoothed_smr_map = ggplot(map_rates_long_SMR) +
   geom_sf(aes(fill = SMR), color = NA) +
   scale_fill_viridis_c(
     name = "SMR",
@@ -649,6 +651,11 @@ rape_PP_stInt = ggplot() + geom_sf(data=map_stInt_RR_PP) + aes(fill=PP_cat) + th
 
 ### Temporal resRRs & CIs (rape & dowry)
 
+```{r, fig.width=10, fig.height=7}
+stInt_m
+```
+
+
 
 ```{r, fig.width=12, fig.height=4}
 
@@ -701,20 +708,20 @@ dowry_int_map =  ggplot() + geom_sf(data = data_st, aes(fill=int_dowry_cat)) + t
   guides(fill=guide_legend(title=NULL)) + 
   theme(text = element_text(size=20),
         axis.text.x = element_blank(), axis.text.y = element_blank()) +
-facet_wrap(~ year, ncol = 4, labeller=labeller(ID_year=c("1"="2001","2"="2002","3"="2003","4"="2004","5"="2005",
+facet_wrap(~ year, ncol = 5, labeller=labeller(ID_year=c("1"="2001","2"="2002","3"="2003","4"="2004","5"="2005",
                             "6"="2006","7"="2007","8"="2008","9"="2009","10"="2010",
                             "11"="2011","12"="2012","13"="2013","14"="2014"))) +
-labs("")
+labs(title="Dowry")
 
 rape_int_map =  ggplot() + geom_sf(data = data_st, aes(fill=int_rape_cat)) + theme_bw() +
   scale_fill_brewer(palette = "PuOr") +
   guides(fill=guide_legend(title=NULL)) + 
   theme(text = element_text(size=20),
         axis.text.x = element_blank(), axis.text.y = element_blank()) +
-facet_wrap(~ year, ncol = 4, labeller=labeller(ID_year=c("1"="2001","2"="2002","3"="2003","4"="2004","5"="2005",
+facet_wrap(~ year, ncol = 5, labeller=labeller(ID_year=c("1"="2001","2"="2002","3"="2003","4"="2004","5"="2005",
                             "6"="2006","7"="2007","8"="2008","9"="2009","10"="2010",
                             "11"="2011","12"="2012","13"="2013","14"="2014"))) +
-labs("")
+labs(title="Rape")
 
 dowry_int_map
 rape_int_map
@@ -749,7 +756,7 @@ dowry_stInt_postRR = ggplot() + geom_sf(data = data_st, aes(fill = RR_total_cat_
 facet_wrap(~ year, ncol = 5, labeller=labeller(ID_year=c("1"="2001","2"="2002","3"="2003","4"="2004","5"="2005",
                             "6"="2006","7"="2007","8"="2008","9"="2009","10"="2010",
                             "11"="2011","12"="2012","13"="2013","14"="2014"))) +
-labs(title = "Posterior Mean Relative Risks of Dowry Deaths")
+labs(title = "Dowry Crime")
 
 dowry_stInt_postRR
 
@@ -781,7 +788,7 @@ rape_stInt_postRR = ggplot() + geom_sf(data = data_st, aes(fill = RR_total_cat_r
 facet_wrap(~ year, ncol = 5, labeller=labeller(ID_year=c("1"="2001","2"="2002","3"="2003","4"="2004","5"="2005",
                             "6"="2006","7"="2007","8"="2008","9"="2009","10"="2010",
                             "11"="2011","12"="2012","13"="2013","14"="2014"))) +
-labs(title = "Posterior Mean Relative Risks of Rapes")
+labs(title = "Rape")
 
 rape_stInt_postRR
 
@@ -792,14 +799,13 @@ rape_stInt_postRR
 ### WAICs 
 
 ```{r}
-WAIC_df = data.frame(model = c("Spatial", "Spatio-temporal", "Spatio-Temporal + Int"), 
-                       WAIC_dowry = round(c(s_dowry_model$waic$waic, st_dowry_model$waic$waic, st_int_model_dowry$waic$waic)),
-                        WAIC_rape = round(c(s_rape_model$waic$waic, st_rape_model$waic$waic, st_int_model_rape$waic$waic)))
+WAIC_df = data.frame(model = c("Spatio-temporal", "Spatio-Temporal + Int"), 
+                       WAIC_dowry = round(c(st_dowry_model$waic$waic, st_int_model_dowry$waic$waic)),
+                        WAIC_rape = round(c(st_rape_model$waic$waic, st_int_model_rape$waic$waic)))
 colnames(WAIC_df) = c("Model", "WAIC (Dowry)", "WAIC (Rape)")                    
-waic_table = knitr::kable(WAIC_df, caption = "Hyperparameter Summary for Different Models and Crimes") %>%
+waic_table = knitr::kable(WAIC_df, caption = "Table 1: WAIC for Different Models and Crimes") %>%
   kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 waic_table
-save_kable(waic_table, file = "waic_table.png")
 
 ```
 
@@ -843,7 +849,7 @@ knitr::kable(hyper_df, caption = "Hyperparameter Summary for Different Models an
 ```
 
 ```{r}
-ggplot(hyper_df, aes(x = Model, y = mean, color = Crime, group = Crime)) +
+hyper_all = ggplot(hyper_df, aes(x = Model, y = mean, color = Crime, group = Crime)) +
   geom_point(position = position_dodge(width = 0.5), size = 3) +
   geom_errorbar(aes(ymin = `0.025quant`, ymax = `0.975quant`),
                 width = 0.2, position = position_dodge(width = 0.5)) +
@@ -916,7 +922,7 @@ hyper_wide <- hyper_wide %>%
   )
 
 # 4. Create a publication-ready table
-kable(hyper_wide, "html", caption = "Posterior Summaries of Hyperparameters") %>%
+stInt_hyper = kable(hyper_wide, "html", caption = "Table 2:Posterior Summaries of Hyperparameters") %>%
   kable_styling(full_width = FALSE)
 
 ```

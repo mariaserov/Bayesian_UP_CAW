@@ -2,13 +2,13 @@
 title: "Bayesian Spatio-Temporal modelling of crime against women in Uttar Pradesh"
 author: "Wanqing Fang, Ben Ling, Maria Serova, Yi Zhou"
 date: "31/03/2025"
-output: 
-  pdf_document: default
+output:
   html_document:
     fig_caption: true
+  pdf_document: default
 always_allow_html: true
 header-includes: \usepackage{bm}
-bibliography: biblio.bib
+#bibliography: biblio.bib
 abstract: Include your Abstract here. This should be an unstructured abstract of 200
   words, summarising the main contents of the scientific report.
 editor_options:
@@ -46,11 +46,11 @@ library(kableExtra)
 #rm(list=ls())
 setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 load("../../CrimeUttarPradesh.RData")
+
+# load figures
+load("Figures.RData")
 ```
 
-```{r}
-
-```
 
 # Introduction
 
@@ -93,30 +93,37 @@ To include citations, please refers to the practicals used in our module and the
 
 Between 2001 and 2014, the total number of reported rape cases and dowry deaths was 25,513 and 28,600, respectively, with the corresponding yearly means of 2,043 (±334) and 1,822 (±691).
 Several districts frequently exhibited the highest yearly rates, such as Philibit and Chitrakoot (rape) and Alogarh (dowry deaths).
-In contrast, Sant Ravidas Nagar Bhadohi frequently had the lowest rates of both crimes (Supp Table 1).
-Temporal evolutions of unsmoothed standardised mortality ratios (SMRs) reveal a general increase in both crimes from 2003, stabilising for dowry deaths after 2008, and increasing sharply for rape from 2010 onwards.
-District-level trajectories (Supp.fig.X) show substantial variability, motivating the use of spatio-temporal smoothing and interaction terms.
-Spatially aggregated unsmoothed SMRs reveal a gradient of increasing crime rates towards the West of the region.
+In contrast, Sant Ravidas Nagar Bhadohi frequently had the lowest rates of both crimes (Supplementary Table 1).
+Temporal evolutions of unsmoothed standardised mortality ratios (SMRs) reveal a general increase in both crimes from 2003, stabilising for dowry deaths after 2008, and increasing sharply for rape from 2010 onwards (Figure 1).
+District-level trajectories (Supplementary Figure 1) show substantial variability, motivating the use of spatio-temporal smoothing and interaction terms.
+Spatially aggregated unsmoothed SMRs reveal a gradient of increasing crime rates towards the West of the region (Figure 1).
 This spatial patterning further motivates the use of smoothing models to enable strength borrowing from neighbours, hence producing higher confidence risk estimates.
 
-```{r EDA-figure, , fig.width=15, fig.height=4}
-# Plot data
-load("plots/unsmoothedSMRs.RData")
-usmoothed_map | unsmoothed_smr_map
+```{r EDA-figure, fig.width=12, fig.height=3, fig.cap="Figure 1"}
+# Plot unsmoothed data
+unsmoothed
 ```
 
 ## Model comparison
 
 We fit spatial (S), spatio-temporal (ST), and spatio-temporal with Interaction Type I (ST+I) model for each crime type.
 All three models captured similar spatial clusters of elevated and lower risks and corresponding exceedance probabilities.
-The S and ST models yielded similar smoothed maps of posterior spatial RRs (Supplementary Figure X).
+The S and ST models yielded similar smoothed maps of posterior spatial RRs (Supplementary Figures 2-3).
 Including an interaction term enabled identification of several regions of higher risk and higher exceedance probabilities for both crimes.
-Furthermore, the ST+I model yielded lower WAIC for both crimes compared to the ST model, indicating a better fit (S model was not included in this comparison as it was fit on aggregate data).
+Furthermore, the ST+I model yielded lower WAIC for both crimes compared to the ST model (Table 1), indicating a better fit (S model was not included in this comparison as it was fit on aggregate data).
 It was therefore deemed the most appropriate model.
+
+```{r wiac_table, fig.cap="Table 1"}
+waic_table
+```
 
 ## Spatial effects
 
-The district-specific posterior means of spatial relative risks (RRs) (column 1) and corresponding exceedance probabilities (column 2) for both rapes and dowry deaths are shown in figure X.
+The district-specific posterior means of spatial relative risks (RRs) (column 1) and corresponding exceedance probabilities (column 2) for both rapes and dowry deaths are shown in Figure 2.
+```{r stInt_m, fig.width=10, fig.height=6, fig.cap="Figure 2"}
+stInt_m
+```
+
 For dowry deaths, a gradient of increasing risk from East to West is apparent.
 A pronounced high-risk cluster can be observed in the South-Western districts, particularly concentrated around Etah and Mainpuri.
 This is corroborated by the high exceedance probabilities (0.8-1) in this area.
@@ -126,23 +133,35 @@ These patterns are largely mirrored by rape RRs, with the Eastern area also exhi
 However, the spatial pattern of higher risk is more dispersed, with two clusters identified in the South and North-West, concentrated around Bulandshahr and Chitrakoot.
 Additionally, the rape RRs exhibit a wider range (0.294-2.28) compared to dowry death RRs (0.423-2.1).
 
-This is corroborated by the precision hyperparameter of the spacial component (BYM2) of the two models, with lower precision (and hence higher variance) in rape model indicating greater spatial variability of rape (Table X).
+This is corroborated by the precision hyperparameter of the spacial component (BYM2) of the two models, with lower precision (and hence higher variance) in rape model indicating greater spatial variability of rape (Table 2).
+```{r stInt_hyper_table}
+stInt_hyper
+```
+
 The posterior precision hyperparameters of temporal and interaction components are higher than that of spatial effects in both models, indicating that spatial effects explained most of the variability of posterior RRs.
 Furthermore, the high value of phi hyperparameter of both models shows that most of the spatial variation is structured.
 
 ## Temporal and spatio-temporal effects
 
-The temporal trajectories of posterior risk means (Figure X) are largely similar between the ST and the ST+I models for both crimes, with wider CIs of the ST+I model accounting for district-specific temporal trajectories.
+The temporal trajectories of posterior risk means (Figure 3) are largely similar between the ST and the ST+I models for both crimes, with wider CIs of the ST+I model accounting for district-specific temporal trajectories.
+```{r temp_st_stInt, fig.width=12, fig.height=3, fig.cap="Figure 3"}
+temp_st_stInt
+```
+
 For dowry deaths, the overall temporal trend is relatively flat, dropping in 2003 before stabilising around 1.
 The temporal trend of rapes is much sharper, exhibiting a more pronounced drop in 2003, and a much steeper rise afterwards, particularly after 2010.
 This is also reflected in the posterior precision hyperparameter, which is notably lower in the rape model than the dowry model, indicating a higher temporal variability of rapes.
-The ST+I model includes both the national temporal trends and the region-specific deviations, with the residual RRs of interaction term capturing how each region’s temporal pattern differs from the overall trend (supplementary figure X).
+The ST+I model includes both the national temporal trends and the region-specific deviations, with the residual RRs of interaction term capturing how each region’s temporal pattern differs from the overall trend (Supplementary Figure 4).
 There are no notable patterns in interaction effects for dowry deaths.
 For rape, distinct low (dark orange) or high (dark-blue) clusters can be observed, indicating district-specific temporal effects.
 
 ## Overall dynamics of posterior mean relative risks
 
-Posterior mean RRs of the ST+I model, combining spatial, temporal, and spatio-temporal components, and hence capturing geographical and temporal dynamics, are shown for both crimes in figure X.
+Posterior mean RRs of the ST+I model, combining spatial, temporal, and spatio-temporal components, and hence capturing geographical and temporal dynamics, are shown for both crimes in Figure 4.
+```{r meanRR_Post, fig.width=8, fig.height=10, fig.cap="Figure 4"}
+meanRR_post
+```
+
 For both, there is a noticeable decline in risk leading up to 2003, particularly concentrated in the eastern part of the region and especially pronounced for rape.
 Following this decline, dowry death risks experience a mild resurgence before stabilising.
 In contrast, rape risks increase more markedly across most of the region, and again more strongly in the east.
@@ -165,6 +184,29 @@ Think about:
 -   Recommendation for future research and/or for policies
 
 # Supplementary material
+
+```{r dist_table, fig.width=12, fig.height=12, fig.cap="Supplementary Table 1"}
+reg_table
+```
+
+```{r reg_temp_smr, fig.width=12, fig.height=3, fig.cap="Supplementary Figure 1"}
+region_temp_smrs
+```
+
+```{r rape_all_m, fig.width=8.5, fig.height=10, fig.cap="Supplementary Figure 2: Rape"}
+# Plot unsmoothed data
+rape_all_m
+```
+
+```{r dowry_all_m, fig.width=8.5, fig.height=10, fig.cap="Supplementary Figure 3: Dowry"}
+# Plot unsmoothed data
+dowry_all_m
+```
+
+```{r int_map, fig.width=8.5, fig.height=10, fig.cap="Supplementary Figure 4: Interaction"}
+int_map
+```
+
 
 # References
 
