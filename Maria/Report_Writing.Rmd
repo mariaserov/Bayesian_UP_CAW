@@ -111,7 +111,7 @@ All three models captured similar spatial clusters of elevated and lower risks a
 The S and ST models yielded similar smoothed maps of posterior spatial RRs (Supplementary Figures 2-3).
 Including an interaction term enabled identification of several regions of higher risk and higher exceedance probabilities for both crimes.
 Furthermore, the ST+I model yielded lower WAIC for both crimes compared to the ST model (Table 1), indicating a better fit (S model was not included in this comparison as it was fit on aggregate data).
-It was therefore deemed the most appropriate model.
+It was therefore deemed the most appropriate model, with its results discussed further in this section.
 
 ```{r wiac_table, fig.cap="Table 1"}
 waic_table
@@ -138,7 +138,7 @@ This is corroborated by the precision hyperparameter of the spacial component (B
 stInt_hyper
 ```
 
-The posterior precision hyperparameters of temporal and interaction components are higher than that of spatial effects in both models, indicating that spatial effects explained most of the variability of posterior RRs.
+The precision hyperparameter of spatial (ID_area) effect is lower that that of temporal (ID_year) and interaction (ID_area_year) components in both rape and dowry models, indicating that spatial effects explain most of the variability seen in posterior RRs.
 Furthermore, the high value of phi hyperparameter of both models shows that most of the spatial variation is structured.
 
 ## Temporal and spatio-temporal effects
@@ -151,9 +151,7 @@ temp_st_stInt
 For dowry deaths, the overall temporal trend is relatively flat, dropping in 2003 before stabilising around 1.
 The temporal trend of rapes is much sharper, exhibiting a more pronounced drop in 2003, and a much steeper rise afterwards, particularly after 2010.
 This is also reflected in the posterior precision hyperparameter, which is notably lower in the rape model than the dowry model, indicating a higher temporal variability of rapes.
-The ST+I model includes both the national temporal trends and the region-specific deviations, with the residual RRs of interaction term capturing how each region’s temporal pattern differs from the overall trend (Supplementary Figure 4).
-There are no notable patterns in interaction effects for dowry deaths.
-For rape, distinct low (dark orange) or high (dark-blue) clusters can be observed, indicating district-specific temporal effects.
+The ST+I model includes both the national temporal trends and the region-specific deviations, with the residual RRs of interaction term capturing how each region’s temporal pattern differs from the overall trend. There are no notable patterns of interaction effects for dowry deaths, with some clusters observed for dowry deaths (for more information, please see Supplementary Figure 4).
 
 ## Overall dynamics of posterior mean relative risks
 
