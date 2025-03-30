@@ -75,7 +75,6 @@ We first merged spatial data with statistical data for geographic visualization.
 
 Bayesian hierarchical models were used to model crime risk over space and time. We fitted three models: (1) a spatial model using BYM2 random effects to capture district-level variation; (2) a spatial-temporal model extending (1) with a temporal component \( \gamma_t \sim \text{RW1} \); and (3) a spatial-temporal type-I interaction model adding a spatial-temporal interaction term $\delta_{it} \sim \mathcal{N}(0, \sigma^2_\delta)$ to allow for region-specific temporal trends.
 
-{ 
 \normalsize
 \renewcommand{\arraystretch}{1.0}
 \setlength{\tabcolsep}{6pt}
@@ -108,7 +107,6 @@ $\delta_{it} \sim \mathcal{N}(0, \sigma^2_\delta)$ \\
 
 \end{tabular}
 \end{center}
-}
 
 The spatial component in all models was defined using the BYM2 parameterization, where the spatial effect $b_i$ is decomposed into structured and unstructured components as:
 
