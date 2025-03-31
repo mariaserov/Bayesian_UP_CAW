@@ -38,7 +38,10 @@ This document provides the code used to carry out the analysis of the project on
 
 2. Modelling: this section includes code used to fit three models: spatial, spatio-temporal, and spatio-temporal with Interaction type I, each fitted separately for rape and dowry deaths, as represented in the subtitles. It also includes the code for visualising the results of the models.   
 
-3. Results visualisation: the code used to produce additional figures and compile them into the visualisation file that was used in the report. 
+3. Sensitivity analysis
+
+4. Results visualisation: the code used to produce additional figures and compile them into the visualisation file that was used in the report. 
+
 
 ```{r eval=TRUE, echo=TRUE}
 # loading all required libraries
@@ -67,7 +70,7 @@ ls()
 ```
 
 
-# Descriptive analysis
+# 1. Descriptive analysis
 
 ### Temporal trends of SMR & visualisation
 
@@ -209,7 +212,7 @@ unsmoothed_smr_map <- ggplot(map_rates_long_SMR) +
 unsmoothed_smr_map
 ```
 
-# Modelling:
+# 2. Modelling:
 
 ```{r}
 # 1 - Check the coordinates & min distances between polygons:
@@ -668,7 +671,107 @@ rape_PP_stInt = ggplot() + geom_sf(data=map_stInt_RR_PP) + aes(fill=PP_cat) + th
 rape_RR_stInt | rape_PP_stInt
 ```
 
-# Results visualisation
+# 3. Sensitivity analysis
+
+```{r}
+# Define the priors used for sensitivity analysis (to be included in report)
+
+knitr::opts_chunk$set(echo = TRUE)
+
+# Create the table data
+prior_settings <- data.frame(
+  Model = c("Base_PC", "Weaker_Shrinkage", "Stronger_Spatial"),
+  U = c(0.31, 0.5, 0.3),
+  Alpha = c(0.01, 0.01, 0.05),
+  Phi = c("2/3", "0.5", "0.8"),
+  Description = c(
+    "Original PC prior",
+    "Weaker shrinkage: allows more variance, favors less spatial structure",
+    "Stronger spatial structure: tighter σ, favors more spatial structure"
+  )
+)
+
+
+# render  with borders
+sensitivity_priors <- kable(prior_settings, format = "html", escape = FALSE, align = "c",
+      caption = "Hyperprior Settings for Sensitivity Analysis") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive", "bordered"),
+                full_width = FALSE,
+                position = "center") %>%
+  column_spec(1:4, width = "8em") %>%
+  column_spec(5, width = "30em")
+
+# Function to fit the model with custom PC priors
+fit_st_model <- function(data, E, adj, u_val, alpha_val, phi_alpha) {
+  formula_custom = O ~ 
+    f(ID_area, model="bym2", graph=adj, 
+      hyper=list(
+        prec=list(prior="pc.prec", param=c(0.5/u_val, alpha_val)),
+        phi=list(prior="pc", param=c(0.5, phi_alpha))
+      )) + 
+    f(ID_year, model="rw1", 
+      hyper=list(prec=list(prior="pc.prec", param=c(0.5/u_val, alpha_val)))) + 
+    f(ID_area_year, model="iid", 
+      hyper=list(prec=list(prior="pc.prec", param=c(0.5/u_val, alpha_val))))
+  
+  model = inla(formula_custom, family="poisson", data=data, E=E, 
+               control.compute = list(dic = TRUE, waic = TRUE),
+               control.predictor = list(compute = TRUE))
+  
+  return(model)
+}
+
+# Define prior settings to test
+# Define prior settings to test (updated names)
+prior_settings = data.frame(
+  model_id = c("Base_PC", "Weaker_Shrinkage", "Stronger_Spatial"),
+  u_val = c(0.31, 0.5, 0.3),
+  alpha_val = c(0.01, 0.01, 0.05),
+  phi_alpha = c(2/3, 0.5, 0.8)
+)
+
+# Container for results
+results = data.frame()
+
+# Loop over models for Dowry and Rape
+for(crime in c("dowry", "rape")) {
+  data_input = if(crime == "dowry") data_st_dowry else data_st_rape
+  
+  for(i in 1:nrow(prior_settings)) {
+    cat("Running", crime, "model:", prior_settings$model_id[i], "\n")
+    
+    model = fit_st_model(
+      data = data_input,
+      E = E,
+      adj = adj,
+      u_val = prior_settings$u_val[i],
+      alpha_val = prior_settings$alpha_val[i],
+      phi_alpha = prior_settings$phi_alpha[i]
+    )
+    
+    # Extract hyperparameter summaries
+    hyp = model$summary.hyperpar
+    
+    results = rbind(
+      results,
+      data.frame(
+        Crime = crime,
+        Model = prior_settings$model_id[i],
+        DIC = model$dic$dic,
+        WAIC = model$waic$waic,
+        Prec_ID_area = hyp["Precision for ID_area", "mean"],
+        Phi_ID_area = hyp["Phi for ID_area", "mean"],
+        Prec_ID_year = hyp["Precision for ID_year", "mean"],
+        Prec_ID_area_year = hyp["Precision for ID_area_year", "mean"]
+      )
+    )
+  }
+}
+
+sensitivity <- kable(results, caption = "Sensitivity Analysis Results for Spatio-temporal Models with Interaction I") %>% kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
+```
+
+# 4. Results visualisation
 
 ### Additional figures
 
@@ -1000,6 +1103,8 @@ stInt_hyper
 This is done so that figures can be subsequently loaded into the report file and visualised
 
 ```{r}
-save(unsmoothed, region_temp_smrs, rape_all_m, dowry_all_m, rape_title, dowry_title, stInt_m, temp_st_stInt, int_map, meanRR_post, waic_table, stInt_hyper, hyper_all, reg_table, file="Figures.RData")
+save(unsmoothed, region_temp_smrs, rape_all_m, dowry_all_m, rape_title, dowry_title, stInt_m, temp_st_stInt, int_map, meanRR_post, waic_table, stInt_hyper, hyper_all, reg_table, sensitivity_priors, sensitivity, file="Figures.RData")
 ```
+
+
 
