@@ -73,7 +73,7 @@ Data were sourced from the National Crime Record Bureau, covering rape and dowry
 
 We first merged spatial data with statistical data for geographic visualization. For each region, the standardized incidence ratio (SMR = O/E) was calculated over 14 years, where \( O \) is the observed and \( E \) the expected number of cases. To visualize regional risk differences, we created a regional average SMR map (Figure 1) and plotted annual average SMRs to assess temporal patterns across districts (Figure 1).
 
-Bayesian hierarchical models were used to model crime risk over space and time. We fitted three models: (1) a spatial model using BYM2 random effects to capture district-level variation; (2) a spatial-temporal model extending (1) with a temporal component \( \gamma_t \sim \text{RW1} \); and (3) a spatial-temporal type-I interaction model adding a spatial-temporal interaction term $\delta_{it} \sim \mathcal{N}(0, \sigma^2_\delta)$ to allow for region-specific temporal trends.
+We fitted three Bayesian hierarchical models to assess crime risk over space and time. Model 1 includes spatial random effects using the BYM2 specification to capture district-level variation. Model 2 extends this by adding a temporal effect $\gamma_t \sim \text{RW1}$. Model 3 further incorporates a spatial-temporal interaction term $\delta_{it} \sim \mathcal{N}(0, \sigma_\delta^2)$ to allow for district-specific temporal trends.
 
 \normalsize
 \renewcommand{\arraystretch}{1.0}
@@ -108,12 +108,11 @@ $\delta_{it} \sim \mathcal{N}(0, \sigma^2_\delta)$ \\
 \end{tabular}
 \end{center}
 
-The spatial component in all models was defined using the BYM2 parameterization, where the spatial effect $b_i$ is decomposed into structured and unstructured components as:
-
+For area $i$ at time $t$, the number of observed cases is denoted by $O$, and the expected number based on the population is denoted by $E$. The incidence rate of the crime (rape/dowry death) is represented by $\rho$. The spatial effect $b_i$ is modeled using the BYM2 parameterization:
 \[
-b_i = \frac{1}{\sqrt{\tau_b}} \left( \sqrt{1 - \phi} \cdot v_i + \sqrt{\phi} \cdot u_i \right)
+b_i = \frac{1}{\sqrt{\tau_b}} \left( \sqrt{1 - \phi} \cdot v_i + \sqrt{\phi} \cdot u_i \right),
 \]
-where $v_i$ represents unstructured (iid) noise and $u_i$ represents structured spatial variation. $\phi$ controls the proportion of spatial variation explained by the structured component, and $\tau_b$ is the overall precision.
+where $u_i$ represents the spatially structured component with an intrinsic conditional autoregressive (ICAR) prior, and $v_i$ is the unstructured random effect assumed to follow a normal distribution. Temporal variation is captured by a time effect $\gamma_t$, modeled as a first-order random walk (RW1). In Model 3, $\delta_{it}$ is a spatial-temporal interaction term, assumed to follow a normal distribution with mean zero.
 
 Penalized Complexity (PC) priors were used for all precision and spatial mixing parameters to impose regularization and reduce overfitting. Each PC prior is defined by two hyperparameters: \( U \), the upper limit reflecting a reasonable maximum value, and \( \alpha \), where \( P(\theta > U) = \alpha \) controls the prior’s strength. For all precision parameters, we set \( P(\sigma > 0.5) = 0.01 \), corresponding to \( U = 0.31 \) and \( \alpha = 0.01 \), indicating a strong belief in smooth effects across space and time. For the spatial mixing parameter \( \phi \), we set \( P(\phi < 0.5) = \frac{2}{3} \), indicating a preference for unstructured spatial variation.
 
