@@ -197,6 +197,13 @@ Following this decline, dowry death risks experience a mild resurgence before st
 In contrast, rape risks increase more markedly across most of the region, and again more strongly in the east.
 By the end of the study period, several districts exhibit posterior RRs in the range of 2.5 to 4.75, indicating significantly elevated risk relative to regional baseline.
 
+## Sensitivity analysis table (title placeholder)
+
+```{r dist_table, fig.width=12, fig.height=12, fig.cap="Table 3: Sensitivity analysis results"}
+sensitivity
+```
+
+
 # Discussion and conclusion
 
 This section should synthetically discuss your answer to the research question and how your findings compare or contrast with previous results.
