@@ -128,7 +128,7 @@ year_agg_vis <- year_agg %>% mutate(
   'Lowest Dowry' = paste0(min_rape_region, " (", round(min_dowry_rate, 1), ")") ) %>% 
   select( 'Year', 'Rape', 'Dowry', 'Higest Rape', 'Lowest Rape', 'Highest Dowry', 'Lowest Dowry')
 
-reg_table <- knitr::kable(year_agg_vis, caption = "Yearly summary of crude crime rates (per 100,000 women)") %>%
+reg_table <- knitr::kable(year_agg_vis, format="latex", caption = "Yearly summary of crude crime rates (per 100,000 women)") %>%
   kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 reg_table
 ```
@@ -645,16 +645,10 @@ c = ggplot() + geom_sf(data=map_stInt_RR_PP) + aes(fill=RR_cat) + theme_bw() +
                   axis.text.y = element_blank(), plot.title = element_text(size = 12, face = "bold"))
 
 rape_RR_stInt = ggplot() + geom_sf(data=map_stInt_RR_PP) + aes(fill=RR_cat) + theme_bw() +
-    scale_fill_viridis(
-    option = "plasma", name="PP",
-    discrete = T,
-    direction = -1,
-    guide = guide_legend(
-      title.position = 'top',
-      reverse = T
-    )) +  ggtitle("PP Spatio-temporal model with Interaction I") + theme(text = element_text(size=15), 
+  scale_fill_brewer(palette = "PuOr") + guides(fill=guide_legend(title="RR")) + ggtitle("RR Spatio-temporal model with Interaction I") +
+    theme(text = element_text(size=15), 
                   axis.text.x = element_blank(), 
-                  axis.text.y = element_blank(), plot.title = element_text(size = 12, face = "bold")) 
+                  axis.text.y = element_blank(), plot.title = element_text(size = 12, face = "bold"))
 
 rape_PP_stInt = ggplot() + geom_sf(data=map_stInt_RR_PP) + aes(fill=PP_cat) + theme_bw() +
     scale_fill_viridis(
@@ -693,7 +687,7 @@ prior_settings <- data.frame(
 
 
 # render  with borders
-sensitivity_priors <- kable(prior_settings, format = "html", escape = FALSE, align = "c",
+sensitivity_priors <- kable(prior_settings, format = "latex", escape = FALSE, align = "c",
       caption = "Hyperprior Settings for Sensitivity Analysis") %>%
   kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive", "bordered"),
                 full_width = FALSE,
@@ -962,6 +956,7 @@ rape_row <- rape_title + (rape_RR_stInt + rape_PP_stInt + plot_layout(ncol = 2))
 dowry_row <- dowry_title + (dowry_RR_stInt + dowry_PP_stInt + plot_layout(ncol = 2)) +plot_layout(widths = c(0.1, 1))
 
 stInt_m <- rape_row / dowry_row # compile figures
+stInt_m
 ```
 
 
@@ -974,7 +969,7 @@ WAIC_df = data.frame(model = c("Spatio-temporal", "Spatio-Temporal + Int"),
                        WAIC_dowry = round(c(st_dowry_model$waic$waic, st_int_model_dowry$waic$waic)),
                         WAIC_rape = round(c(st_rape_model$waic$waic, st_int_model_rape$waic$waic)))
 colnames(WAIC_df) = c("Model", "WAIC (Dowry)", "WAIC (Rape)")                    
-waic_table = knitr::kable(WAIC_df, caption = "Table 1: WAIC for Different Models and Crimes") %>%
+waic_table = knitr::kable(WAIC_df, format = "latex", caption = "Table 1: WAIC for Different Models and Crimes") %>%
   kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 waic_table
 
@@ -1093,7 +1088,7 @@ hyper_wide <- hyper_wide %>%
   )
 
 # 4. Create a publication-ready table
-stInt_hyper = kable(hyper_wide, "html", caption = "Table 2:Posterior Summaries of Hyperparameters") %>%
+stInt_hyper = kable(hyper_wide, format="latex", booktabs = TRUE, caption = "Table 2:Posterior Summaries of Hyperparameters") %>%
   kable_styling(full_width = FALSE)
 
 stInt_hyper
@@ -1105,6 +1100,7 @@ This is done so that figures can be subsequently loaded into the report file and
 ```{r}
 save(unsmoothed, region_temp_smrs, rape_all_m, dowry_all_m, rape_title, dowry_title, stInt_m, temp_st_stInt, int_map, meanRR_post, waic_table, stInt_hyper, hyper_all, reg_table, sensitivity_priors, sensitivity, file="Figures.RData")
 ```
+
 
 
 

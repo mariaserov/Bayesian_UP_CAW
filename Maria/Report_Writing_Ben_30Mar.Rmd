@@ -6,8 +6,9 @@ output:
   pdf_document: default
   html_document:
     fig_caption: true
+    md_extensions: +raw_tex # added to enable LaTeX in html
 always_allow_html: true
-header-includes: \usepackage{bm}
+header-includes: \usepackage{bm} \usepackage{booktabs}
 #bibliography: biblio.bib
 abstract: Include your Abstract here. This should be an unstructured abstract of 200
   words, summarising the main contents of the scientific report.
@@ -16,9 +17,10 @@ editor_options:
     wrap: sentence
 ---
 
+```{=tex}
 \pagenumbering{gobble} 
 \pagenumbering{arabic}
-
+```
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, message=FALSE, warning=FALSE, fig.align = "center", class.source='klippy')
 ```
@@ -43,7 +45,7 @@ library(kableExtra)
 
 # Prepare directory and data
 #rm(list=ls())
-setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 load("CrimeUttarPradesh.RData")
 
 # load figures
@@ -52,17 +54,22 @@ load("Figures.RData")
 
 # Introduction
 
-Violence against women remains a major public health and human rights issue in India. Rape and dowry deaths are among the gravest forms, reflecting deep-rooted gender inequality. Rape in particular is underreported due to social stigma and fear of retaliation [@Shanmugam2013].
-The dowry system, whereby a bride’s family provides payment to the groom’s family, can lead to dowry deaths when brides are murdered or driven to suicide through harassment and violence [@Rastogi2006]. We look to Uttar Pradesh, India's most populous state as a reference point for analysis.
+Violence against women remains a major public health and human rights issue in India.
+Rape and dowry deaths are among the gravest forms, reflecting deep-rooted gender inequality.
+Rape in particular is underreported due to social stigma and fear of retaliation [@Shanmugam2013].
+The dowry system, whereby a bride’s family provides payment to the groom’s family, can lead to dowry deaths when brides are murdered or driven to suicide through harassment and violence [@Rastogi2006].
+We look to Uttar Pradesh, India's most populous state as a reference point for analysis.
 
 Vicente et al (2018) [@Vicente2018rape] first applied Bayesian Hierarchical Models (BHM) with Leroux priors for rape data, hypothesising a temporal effect from the widely publicised 2012 Delhi gang rape incident [@Delhigang].
 They then expanded their methods to dowry deaths [@Vicente2020dowry].
 Here, we build on that work by adopting Besag–York–Mollié 2 (BYM2) priors [@Besag1991] and Type I spatiotemporal interactions, and by comparing various hyperprior configurations to validate and extend Vicente et al.’s conclusions [@Vicente2018rape].
 
-Our spatiotemporal analyses of both crimes focus on the following questions: 
-1. Can we replicate Vicente et al.'s findings of distinct spatial patterns for rape and dowry deaths using BYM2 and Type I interactions, with varying hyperpriors?
-2. How have the temporal trends for rape and dowry deaths evolved over the 14-year period, and what emerges when we interpret the findings side-by-side?
-3. Is there evidence of space-time interaction in the occurrence of these crimes, suggesting localised as opposed to state-wide spreading patterns?
+Our spatiotemporal analyses of both crimes focus on the following questions: 1.
+Can we replicate Vicente et al.'s findings of distinct spatial patterns for rape and dowry deaths using BYM2 and Type I interactions, with varying hyperpriors?
+2.
+How have the temporal trends for rape and dowry deaths evolved over the 14-year period, and what emerges when we interpret the findings side-by-side?
+3.
+Is there evidence of space-time interaction in the occurrence of these crimes, suggesting localised as opposed to state-wide spreading patterns?
 
 By leveraging BHM techniques in this manner, we aim to produce more robust spatiotemporal insights that can guide targeted interventions and strengthen the literature on gender-based violence in India.
 
@@ -87,6 +94,7 @@ Three models were fitted:
 
 The three fitted models differ in complexity as follows:
 
+```{=tex}
 \normalsize
 \renewcommand{\arraystretch}{1.0}
 \setlength{\tabcolsep}{6pt}
@@ -118,7 +126,7 @@ $\delta_{it} \sim \mathcal{N}(0, \sigma^2_\delta)$ \\
 
 \end{tabular}
 \end{center}
-
+```
 The BYM2 model was specifically chosen for its clear decomposition of spatial variability into structured and unstructured components, which are easily controlled through the spatial mixing parameter $\phi$.
 This parameterisation offers clearer interpretability and more flexible spatial smoothing compared to standard BYM or intrinsic conditional autoregressive (ICAR) models, which either lack explicit decomposition (ICAR) or provide limited control over component mixing (standard BYM).
 
@@ -168,7 +176,8 @@ unsmoothed
 stInt_m
 ```
 
-```{r stInt_hyper_table}
+```{r stInt_hyper_table, results='asis'}
+
 stInt_hyper
 ```
 
@@ -176,7 +185,7 @@ stInt_hyper
 temp_st_stInt
 ```
 
-```{r wiac_table, fig.cap="Table 1"} 
+```{r wiac_table, fig.cap="Table 1"}
 waic_table
 ```
 
@@ -193,7 +202,8 @@ Rape reporting showed a clear west-to-east gradient which was more marked in the
 This was surprising as we would have expected a uniform increase across the state if media coverage were equal.
 
 In contrast, dowry deaths exhibited persistent clustering around nearby southwestern districts like Etah and Mainpuri, which did not change with the 2012 incident, reflecting potentially entrenched cultural practices concerning dowry.
-It is noted that marital rape was not included in the widening of the definition of rape in early 2013 [@Lawchange]. This potentially limited reporting by women experiencing chronic domestic abuse that might ultimately result in dowry deaths.
+It is noted that marital rape was not included in the widening of the definition of rape in early 2013 [@Lawchange].
+This potentially limited reporting by women experiencing chronic domestic abuse that might ultimately result in dowry deaths.
 The more consistent spatial clustering observed for dowry deaths compared to rape incidents likely reflects different underlying dynamics.
 Dowry deaths may represent the culmination of prolonged domestic violence patterns tied to specific regional cultural factors, resulting in less heterogeneity compared to rape which may be more 'acute' and thus random in comparison.
 
