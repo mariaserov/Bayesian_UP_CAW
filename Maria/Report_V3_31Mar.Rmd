@@ -159,7 +159,7 @@ Drawing on the results above, Figure 4 shows the posterior mean RRs of the ST+I 
 unsmoothed
 ```
 
-```{r stInt_m, fig.width=10, fig.height=6, fig.cap="Figure 2: Spatial patterns of posterior mean relative risks (RR) and posterior probabilities (PP) exceeding 1 from spatio-temporal models with Type I interaction for rape incidents (top) and dowry deaths (bottom)."}
+```{r stInt_m, fig.width=10, fig.height=6, fig.cap="Spatial patterns of posterior mean relative risks (RR) and posterior probabilities (PP) exceeding 1 from spatio-temporal models with Type I interaction for rape incidents (top) and dowry deaths (bottom).", out.width="60%"}
 stInt_m
 ```
 
@@ -172,8 +172,7 @@ stInt_hyper
 temp_st_stInt
 ```
 
-
-```{r meanRR_Post, fig.width=8, fig.height=10, fig.cap="Figure 4: Annual posterior mean relative risks for rape incidents (top) and dowry deaths (bottom) across Uttar Pradesh districts from 2001 to 2014, demonstrating the evolution of spatial patterns over time."}
+```{r meanRR_Post,  fig.pos='H', fig.align='center', fig.width=8, fig.height=10, fig.cap="Annual posterior mean relative risks for rape incidents (top) and dowry deaths (bottom) across Uttar Pradesh districts from 2001 to 2014, demonstrating the evolution of spatial patterns over time.", out.width="60%"}
 meanRR_post
 ```
 
