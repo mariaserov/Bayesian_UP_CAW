@@ -3,10 +3,10 @@ title: "Bayesian Spatio-Temporal modelling of crime against women in Uttar Prade
 author: "Wanqing Fang, Ben Ling, Maria Serova, Yi Zhou"
 date: "31/03/2025"
 output:
+  pdf_document: default
   html_document:
     fig_caption: true
     md_extensions: +raw_tex # added to enable LaTeX in html
-  pdf_document: default
 always_allow_html: true
 header-includes: \usepackage{bm} \usepackage{booktabs}
 #bibliography: biblio.bib
@@ -127,7 +127,7 @@ Penalised Complexity (PC) priors were used for all precision and spatial mixing 
 
 The PC prior for spatial mixing parameter $\phi$, we defined as $P(\phi < 0.5) = \frac{2}{3}$ (Riebler A 2016), reflecting our preference towards unstructured spatial variation. This is driven by the assumption that district-specific factors (such as local crime reporting practices, governance effectiveness, opportunistic crime, or social norms) exert greater influence on crime risk than broader structured spatial trends like systemic poverty and organised crime.
 
-To assess the robustness of our hyperprior choices, we conducted sensitivity analyses by implementing three Penalized Complexity (PC) prior configurations—Base_PC, Weaker_Shrinkage, and Stronger_Spatial—each varying in shrinkage strength and spatial structure preference, and compared model performance (WAIC) and hyperparameter summaries for both dowry death and rape models with Type I spatio-temporal interaction (Supplementary Table 2).
+To assess the robustness of our hyperprior choices, we conducted sensitivity analyses by implementing three Penalized Complexity (PC) prior configurations varying in shrinkage strength and spatial structure preference, and compared model performance (WAIC) and hyperparameter summaries for  dowry death and rape ST+I models (Supplementary Table 2).
 
 All ST and ST+I models were assessed using the Watanabe-Akaike Information Criterion (WAIC), chosen for its ability to balance model fit  with effective penalisation of model complexity in BHMs. 
 The S model was excluded from WAIC comparison due to being fit on aggregate data.
@@ -140,7 +140,7 @@ Figure 1 shows the unsmoothed temporal trends and spatial variability of both cr
 All three models identified comparable patterns of posterior spatial RRs (Supplementary Figures 2-3). 
 The ST+I model showed a better fit compared to the ST model, as reflected in its lower WAIC for both crimes (6240 vs 7781 for rape; 6318 vs 6654 for dowry deaths). Its results are discussed further. 
 
-To assess the robustness of these findings, sensitivity analyses using three PC prior configurations showed minimal variation in WAIC values, with consistently high spatial structure ($\phi$) estimates ($\approx$0.89 for dowry, $\approx$0.84–0.86 for rape), indicating that posterior inferences were primarily driven by the data rather than prior assumptions.(Supplementary table 3)
+Sensitivity analyses using three PC prior configurations showed minimal variation in WAIC values and hyperparameters in the ST+I model, indicating that posterior inferences were primarily driven by the data rather than prior assumptions (Supplementary Table 3).
 
 Figure 2 shows the smoothed spatial posterior relative risks (RRs), as well as the posterior probabilities of exceeded risk (PPs).
 
@@ -161,7 +161,7 @@ Drawing on the results above, Figure 4 shows the posterior mean RRs of the ST+I 
 unsmoothed
 ```
 
-```{r stInt_m, fig.width=10, fig.height=6, fig.cap="Figure 2: Spatial patterns of posterior mean relative risks (RR) and posterior probabilities (PP) exceeding 1 from spatio-temporal models with Type I interaction for rape incidents (top) and dowry deaths (bottom)."}
+```{r stInt_m, fig.width=10, fig.height=6, fig.cap="Figure 2: Spatial patterns of posterior mean relative risks (RR) and posterior probabilities (PP) exceeding 1 from spatio-temporal models with Type I interaction for rape incidents (top) and dowry deaths (bottom).", out.width="60%"}
 stInt_m
 ```
 
@@ -175,7 +175,7 @@ temp_st_stInt
 ```
 
 
-```{r meanRR_Post, fig.width=8, fig.height=10, fig.cap="Figure 4: Annual posterior mean relative risks for rape incidents (top) and dowry deaths (bottom) across Uttar Pradesh districts from 2001 to 2014, demonstrating the evolution of spatial patterns over time."}
+```{r meanRR_Post, fig.width=8, fig.height=10, fig.cap="Figure 4: Annual posterior mean relative risks for rape incidents (top) and dowry deaths (bottom) across Uttar Pradesh districts from 2001 to 2014, demonstrating the evolution of spatial patterns over time.", out.width="60%"}
 meanRR_post
 ```
 
@@ -221,11 +221,11 @@ reg_table
 ```
 
 ```{r setting_table, fig.width=12, fig.height=12, fig.cap="Supplementary Table 2"}
-setting_table
+sensitivity_priors
 ```
 
 ```{r sensitive_table, fig.width=12, fig.height=12, fig.cap="Supplementary Table 3"}
-sensitive_table
+sensitivity
 ```
 
 ```{r reg_temp_smr, fig.width=12, fig.height=3, fig.cap="Supplementary Figure 1: Crude rates of rape incidents and dowry deaths in Uttar Pradesh (2001-2014), showing individual district trends (gray lines) and state average trends (colored lines)."}
