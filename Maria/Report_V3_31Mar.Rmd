@@ -3,10 +3,10 @@ title: "Bayesian Spatio-Temporal modelling of crime against women in Uttar Prade
 author: "Wanqing Fang, Ben Ling, Maria Serova, Yi Zhou"
 date: "31/03/2025"
 output:
-  pdf_document: default
   html_document:
     fig_caption: true
     md_extensions: +raw_tex # added to enable LaTeX in html
+  pdf_document: default
 always_allow_html: true
 header-includes: \usepackage{bm} \usepackage{booktabs}
 #bibliography: biblio.bib
@@ -153,13 +153,13 @@ Spatio-temporal interactions (Supplementary Figure 4) indicated district-specifi
 
 Drawing on the results above, Figure 4 shows the posterior mean RRs of the ST+I model, combining spatial, temporal, and spatio-temporal components, and hence capturing geographical and temporal dynamics. While dowry death risks remain relatively stable after 2004, rape risks expereicne a rapid resurgence after 2012, with several districts exhibiting RRs of 2.5–4.75 in 2014. 
 
-```{r EDA-figure, fig.width=12, fig.height=3, fig.cap="Temporal evolution of standardised SMRs for rape incidents and dowry deaths in Uttar Pradesh (2001-2014) (left) and spatial distribution of SMRs aggregated over the study period (right)"}
+```{r EDA-figure, fig.width=12, fig.height=3, fig.cap="Figure 1: Temporal evolution of standardised SMRs for rape incidents and dowry deaths in Uttar Pradesh (2001-2014) (left) and spatial distribution of SMRs aggregated over the study period (right)"}
 
 # Plot unsmoothed data
 unsmoothed
 ```
 
-```{r stInt_m, fig.width=10, fig.height=6, fig.cap="Spatial patterns of posterior mean relative risks (RR) and posterior probabilities (PP) exceeding 1 from spatio-temporal models with Type I interaction for rape incidents (top) and dowry deaths (bottom).", out.width="60%"}
+```{r stInt_m, fig.width=10, fig.height=6, fig.cap="Figure 2: Spatial patterns of posterior mean relative risks (RR) and posterior probabilities (PP) exceeding 1 from spatio-temporal models with Type I interaction for rape incidents (top) and dowry deaths (bottom)."}
 stInt_m
 ```
 
@@ -168,11 +168,12 @@ stInt_m
 stInt_hyper
 ```
 
-```{r temp_st_stInt, fig.width=12, fig.height=3, fig.cap="Comparison of temporal trends in relative risks between spatio-temporal models without interaction (left) and with Type I interaction (right) for rape incidents and dowry deaths in Uttar Pradesh (2001-2014)."}
+```{r temp_st_stInt, fig.width=12, fig.height=3, fig.cap="Figure 3: Comparison of temporal trends in relative risks between spatio-temporal models without interaction (left) and with Type I interaction (right) for rape incidents and dowry deaths in Uttar Pradesh (2001-2014)."}
 temp_st_stInt
 ```
 
-```{r meanRR_Post,  fig.pos='H', fig.align='center', fig.width=8, fig.height=10, fig.cap="Annual posterior mean relative risks for rape incidents (top) and dowry deaths (bottom) across Uttar Pradesh districts from 2001 to 2014, demonstrating the evolution of spatial patterns over time.", out.width="60%"}
+
+```{r meanRR_Post, fig.width=8, fig.height=10, fig.cap="Figure 4: Annual posterior mean relative risks for rape incidents (top) and dowry deaths (bottom) across Uttar Pradesh districts from 2001 to 2014, demonstrating the evolution of spatial patterns over time."}
 meanRR_post
 ```
 
