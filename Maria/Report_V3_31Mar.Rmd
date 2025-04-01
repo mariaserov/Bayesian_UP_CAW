@@ -6,10 +6,11 @@ output:
   pdf_document: default
   html_document:
     fig_caption: true
-    md_extensions: +raw_tex # added to enable LaTeX in html
+    md_extensions: +raw_tex
+  word_document: default
 always_allow_html: true
 header-includes: \usepackage{bm} \usepackage{booktabs}
-#bibliography: biblio.bib
+bibliography: biblio.bib
 abstract: Include your Abstract here. This should be an unstructured abstract of 200
   words, summarising the main contents of the scientific report.
 editor_options:
@@ -45,7 +46,7 @@ library(kableExtra)
 
 # Prepare directory and data
 #rm(list=ls())
-#setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
+setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 load("CrimeUttarPradesh.RData")
 
 # load figures
@@ -182,7 +183,7 @@ meanRR_post
 # Discussion
 
 The most notable finding is the distinct temporal pattern observed between the two crimes: rape incidence showed a substantial increase especially after 2012, while dowry deaths remained relatively stable (Figure 3).    
-Vicente et al. (2018) reported similar findings for rape, noting its temporal alignment with the highly publicised 2012 Delhi gang rape incident and subsequent 2013 legal reforms that expanded the definition of rape [@vicente2018rape] [@Delhigang].
+Vicente et al. (2018) reported similar findings for rape, noting its temporal alignment with the highly publicised 2012 Delhi gang rape incident and subsequent 2013 legal reforms that expanded the definition of rape [@Vicente2018rape] [@Delhigang].
 The rape models also exhibited a markedly lower precision hyperparameter of temporal component, compared to that of dowry deaths (Table 1), suggesting that global temporal effects played a more prominent role in shaping rape risk compared to dowry risk.
 Whilst our study cannot establish causation, the divergence in temporal trajectories of risk concurs that a sudden event affected rape incidence more than dowry deaths.
 
