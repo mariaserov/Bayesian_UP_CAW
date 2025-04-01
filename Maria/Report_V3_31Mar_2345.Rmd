@@ -132,7 +132,7 @@ All precision priors were defined as $P(\sigma > 0.5) = 0.01$, reflecting a stro
 The PC prior for spatial mixing parameter $\phi$, we defined as $P(\phi < 0.5) = \frac{2}{3}$ [@Riebler2016], reflecting our preference towards unstructured spatial variation.
 This is driven by the assumption that district-specific factors (such as local crime reporting practices, governance effectiveness, opportunistic crime, or social norms) exert greater influence on crime risk than broader structured spatial trends like systemic poverty and organised crime.
 
-To assess the robustness of our hyperprior choices, we conducted sensitivity analyses by implementing three Penalized Complexity (PC) prior configurations: Base_PC, Weaker_Shrinkage, and Stronger_Spatial, each varying in shrinkage strength and spatial structure preference, and compared model performance (WAIC) and hyperparameter summaries for both dowry death and rape models with Type I spatio-temporal interaction (Supplementary Table 2).
+To assess the robustness of our hyperprior choices, we conducted sensitivity analyses by implementing three Penalised Complexity (PC) prior configurations: Base_PC, Weaker_Shrinkage, and Stronger_Spatial, each varying in shrinkage strength and spatial structure preference, and compared model performance (WAIC) and hyperparameter summaries for both dowry death and rape models with Type I spatio-temporal interaction (Supplementary Table 3).
 
 All ST and ST+I models were assessed using the Watanabe-Akaike Information Criterion (WAIC), chosen for its ability to balance model fit with effective penalisation of model complexity in BHMs.
 The S model was excluded from WAIC comparison due to being fit on aggregate data.
@@ -146,7 +146,7 @@ All three models identified comparable patterns of posterior spatial RRs (Supple
 The ST+I model showed a better fit compared to the ST model, as reflected in its lower WAIC for both crimes (6240 vs 7781 for rape; 6318 vs 6654 for dowry deaths).
 Its results are discussed further.
 
-Sensitivity analyses using three PC prior configurations showed minimal variation in WAIC values, with consistently high spatial structure ($\phi$) estimates (\$\approx\$0.89 for dowry, \$\approx\$0.84–0.86 for rape), indicating that posterior inferences were primarily driven by the data rather than prior assumptions.(Supplementary table 3)
+Sensitivity analyses using three PC prior configurations showed minimal variation in WAIC values, with consistently high spatial structure ($\phi$) estimates (\$\approx\$0.89 for dowry, \$\approx\$0.84–0.86 for rape), indicating that posterior inferences were primarily driven by the data rather than prior assumptions.(Figure 2)
 
 Figure 2 shows the smoothed spatial posterior relative risks (RRs), as well as the posterior probabilities of exceeded risk (PPs).
 Both unsmoothed and smoothed estimates of dowry deaths maintained an east-to-west gradient, with high-risk districts identified around Etah and Mainpuri in the southwest.
