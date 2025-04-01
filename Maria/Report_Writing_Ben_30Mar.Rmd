@@ -80,9 +80,9 @@ Standardised morbidity ratios (SMR) for rape and standardised mortality ratios (
 A consistency check confirmed that the expected values in SMR calculations were correctly derived from aggregated statewide data, ensuring a clear internal baseline for comparisons across districts.
 Unsmoothed SMR data by district and year were mapped and graphed to obtain 'raw' baseline spatial and temporal patterns (Figure 1) as a starting point for our analysis.
 
-BHMs were then employed over these traditional frequentist SMR methods because they explicitly model spatial autocorrelation and better quantify uncertainty.
-BHMs provide more precise risk estimates by "borrowing strength" from neighbouring districts, overcoming limitations of simple ratio-based analyses that assume independence among districts.
-This approach is particularly important from a policy perspective, as it produces reliable district-level estimates even where crime reporting is sparse, facilitating more accurate resource allocation and potential targeted interventions.
+To account for spatial autocorrelation and uncertainty, Bayesian hierarchical models (BHMs) were employed. 
+BHMs provide more reliable district-level estimates by borrowing strength from neighbouring districts, addressing limitations of traditional SMR methods. 
+This is especially important for informing resource allocation and policy decisions, as it improves estimation even where reporting is sparse.
 
 Three models were fitted:
 
@@ -144,13 +144,13 @@ For precision parameters, we set $P(\sigma > 0.5) = 0.01$, corresponding to $U =
 This choice reflects our assumption that district boundaries are relatively arbitrary compared to state borders regarding sociocultural and administrative characteristics, suggesting gradual rather than abrupt spatial transitions in crime risk.
 
 For the spatial mixing parameter $\phi$, we set $P(\phi < 0.5) = \frac{2}{3}$ to denote our preference towards unstructured spatial variation.
-This preference was based on our assumption that district-specific factors (such as local crime reporting practices, governance effectiveness, opportunistic crime, or social norms) exert greater influence on crime risk than broader structured spatial trends like systemic poverty and organised crime.
+This preference was based on our assumption that district-specific factors (such as local crime reporting practices, governance effectiveness, or social norms) exert greater influence on crime risk than broader structured spatial trends like systemic poverty and organised crime.
 
 Sensitivity analyses tested the robustness of our hyperprior choices by comparing them with two alternative configurations, modifying the shrinkage and spatial structure preference.
 The specific parameter values used and their outcomes are detailed in Table 3.
 
-We then assessed all ST and ST+I models using the Watanabe-Akaike Information Criterion (WAIC), chosen for its suitability in comparing BHMs due to effective penalisation of model complexity (and overfitting) and accurate approximation of predictive performance.
-(cite validation study?) The S model was excluded from WAIC comparison due to being fit on aggregate data.
+To compare model performance, the WAIC (Watanabe–Akaike Information Criterion) was used due to its suitability in evaluating BHM predictive performance. 
+The spatial-only model was excluded from WAIC comparison as it was fitted on aggregate data.
 
 # Results
 
@@ -172,7 +172,7 @@ By 2014, several districts exhibited posterior RRs of 2.5–4.75, indicating sig
 unsmoothed
 ```
 
-```{r stInt_m, fig.width=10, fig.height=6, fig.cap="Figure 2: Spatial patterns of posterior mean relative risks (RR) and posterior probabilities (PP) exceeding 1 from spatio-temporal models with Type I interaction for rape incidents (top) and dowry deaths (bottom)."}
+```{r stInt_m, fig.width=10, fig.height=6, fig.cap="Figure 2: Spatial patterns of posterior mean relative risks (RR) and posterior probabilities (PP) exceeding 1 from spatio-temporal models with Type I interaction for rape incidents (top) and dowry deaths (bottom).", out.width="60%"}
 stInt_m
 ```
 
@@ -189,7 +189,7 @@ temp_st_stInt
 waic_table
 ```
 
-```{r meanRR_Post, fig.width=8, fig.height=10, fig.cap="Figure 4: Annual posterior mean relative risks for rape incidents (top) and dowry deaths (bottom) across Uttar Pradesh districts from 2001 to 2014, demonstrating the evolution of spatial patterns over time."}
+```{r meanRR_Post, fig.width=8, fig.height=10, fig.cap="Figure 4: Annual posterior mean relative risks for rape incidents (top) and dowry deaths (bottom) across Uttar Pradesh districts from 2001 to 2014, demonstrating the evolution of spatial patterns over time.", out.width="60%"}
 meanRR_post
 ```
 
