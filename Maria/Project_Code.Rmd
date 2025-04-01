@@ -3,9 +3,9 @@ title: "Bayesian Spatio-Temporal modelling of crime against women in Uttar Prade
 author: "Wanqing Fang, Ben Ling, Maria Serova, Yi Zhou"
 date: "31/03/2025"
 output:
+  pdf_document: default
   html_document:
     fig_caption: true
-  pdf_document: default
 always_allow_html: true
 header-includes: \usepackage{bm}
 #bibliography: biblio.bib
@@ -674,14 +674,14 @@ knitr::opts_chunk$set(echo = TRUE)
 
 # Create the table data
 prior_settings <- data.frame(
-  Model = c("Base_PC", "Weaker_Shrinkage", "Stronger_Spatial"),
+  Model = c("Base PC", "Weaker Shrinkage", "Stronger Spatial"),
   U = c(0.31, 0.5, 0.3),
   Alpha = c(0.01, 0.01, 0.05),
   Phi = c("2/3", "0.5", "0.8"),
   Description = c(
     "Original PC prior",
     "Weaker shrinkage: allows more variance, favors less spatial structure",
-    "Stronger spatial structure: tighter σ, favors more spatial structure"
+    "Stronger spatial structure: tighter $\\sigma$, favors more spatial structure"
   )
 )
 
@@ -718,7 +718,7 @@ fit_st_model <- function(data, E, adj, u_val, alpha_val, phi_alpha) {
 # Define prior settings to test
 # Define prior settings to test (updated names)
 prior_settings = data.frame(
-  model_id = c("Base_PC", "Weaker_Shrinkage", "Stronger_Spatial"),
+  model_id = c("Base PC", "Weaker Shrinkage", "Stronger Spatial"),
   u_val = c(0.31, 0.5, 0.3),
   alpha_val = c(0.01, 0.01, 0.05),
   phi_alpha = c(2/3, 0.5, 0.8)
@@ -762,7 +762,7 @@ for(crime in c("dowry", "rape")) {
   }
 }
 
-sensitivity <- kable(results, caption = "Sensitivity Analysis Results for Spatio-temporal Models with Interaction I") %>% kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
+sensitivity <- kable(results, format="latex", caption = "Sensitivity Analysis Results for Spatio-temporal Models with Interaction I") %>% kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 ```
 
 # 4. Results visualisation
