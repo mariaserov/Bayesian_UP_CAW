@@ -1,6 +1,6 @@
 ---
 title: "Bayesian Spatio-Temporal modelling of crime against women in Uttar Pradesh"
-author: "Wanqing Fang, Ben Ling, Maria Serova, Yi Zhou"
+author: "Wanqing Fang, 06027920 (BL), Maria Serova, Yi Zhou"
 date: "31/03/2025"
 output:
   pdf_document: default
