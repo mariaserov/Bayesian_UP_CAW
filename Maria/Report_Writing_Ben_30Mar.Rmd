@@ -81,9 +81,9 @@ Three models were fitted:
 
 1.  **Spatial model** **(S)** using BYM2 random effects to capture district-level variation.
 
-2.  **Spatio-temporal model (ST)** extending the spatial model with a temporal component (γt\gamma\_tγt​), modelled as a random walk (RW1).
+2.  **Spatio-temporal model (ST)** extending the spatial model with a temporal component ($\gamma_t$), modelled as a random walk (RW1).
 
-3.  **Spatio-temporal interaction model (ST+I)**, adding a spatial-temporal interaction term (δit\delta\_{it}δit​), allowing each district to have unique temporal deviations from the state-wide trend.
+3.  **Spatio-temporal interaction model (ST+I)**, adding a spatial-temporal interaction term ($\delta_{it}$​), allowing each district to have unique temporal deviations from the state-wide trend.
 
 The three fitted models differ in complexity as follows:
 
@@ -176,7 +176,8 @@ stInt_hyper
 temp_st_stInt
 ```
 
-```{r wiac_table, fig.cap="Table 1"} waic_table}
+```{r wiac_table, fig.cap="Table 1"} 
+waic_table
 ```
 
 ```{r meanRR_Post, fig.width=8, fig.height=10, fig.cap="Figure 4: Annual posterior mean relative risks for rape incidents (top) and dowry deaths (bottom) across Uttar Pradesh districts from 2001 to 2014, demonstrating the evolution of spatial patterns over time."}
