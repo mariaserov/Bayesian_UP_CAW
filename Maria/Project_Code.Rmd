@@ -66,7 +66,7 @@ rm(list=ls())
 #setwd(dirname(rstudioapi::getActiveDocumentContext()$path))
 load("CrimeUttarPradesh.RData")
 carto_up <- st_as_sf(carto_up)
-ls()
+fig_format = "html" # For use later, set to "latex" if knitting pdf
 ```
 
 
@@ -128,7 +128,7 @@ year_agg_vis <- year_agg %>% mutate(
   'Lowest Dowry' = paste0(min_rape_region, " (", round(min_dowry_rate, 1), ")") ) %>% 
   select( 'Year', 'Rape', 'Dowry', 'Higest Rape', 'Lowest Rape', 'Highest Dowry', 'Lowest Dowry')
 
-reg_table <- knitr::kable(year_agg_vis, format="latex", caption = "Yearly summary of crude crime rates (per 100,000 women)") %>%
+reg_table <- knitr::kable(year_agg_vis, format=fig_format, caption = "Supplementary Table 1: Yearly summary of crude crime rates (per 100,000 women)") %>%
   kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 reg_table
 ```
@@ -687,9 +687,9 @@ prior_settings <- data.frame(
 
 
 # render  with borders
-sensitivity_priors <- kable(prior_settings, format = "latex", escape = FALSE, align = "c",
-      caption = "Hyperprior Settings for Sensitivity Analysis") %>%
-  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive", "bordered"),
+sensitivity_priors <- kable(prior_settings, format = fig_format, escape = FALSE, align = "c",
+      caption = "Supplementary Table 2: Hyperprior Settings for Sensitivity Analysis") %>%
+  kable_styling(bootstrap_options = c("striped", "hover", "condensed", "responsive"),
                 full_width = FALSE,
                 position = "center") %>%
   column_spec(1:4, width = "8em") %>%
@@ -715,7 +715,6 @@ fit_st_model <- function(data, E, adj, u_val, alpha_val, phi_alpha) {
   return(model)
 }
 
-# Define prior settings to test
 # Define prior settings to test (updated names)
 prior_settings = data.frame(
   model_id = c("Base PC", "Weaker Shrinkage", "Stronger Spatial"),
@@ -762,7 +761,7 @@ for(crime in c("dowry", "rape")) {
   }
 }
 
-sensitivity <- kable(results, format="latex", caption = "Sensitivity Analysis Results for Spatio-temporal Models with Interaction I") %>% kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
+sensitivity <- kable(results, format=fig_format, caption = "Supplementary Table 3: Sensitivity Analysis Results for Spatio-temporal Models with Interaction I") %>% kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 ```
 
 # 4. Results visualisation
@@ -969,7 +968,7 @@ WAIC_df = data.frame(model = c("Spatio-temporal", "Spatio-Temporal + Int"),
                        WAIC_dowry = round(c(st_dowry_model$waic$waic, st_int_model_dowry$waic$waic)),
                         WAIC_rape = round(c(st_rape_model$waic$waic, st_int_model_rape$waic$waic)))
 colnames(WAIC_df) = c("Model", "WAIC (Dowry)", "WAIC (Rape)")                    
-waic_table = knitr::kable(WAIC_df, format = "latex", caption = "Table 1: WAIC for Different Models and Crimes") %>%
+waic_table = knitr::kable(WAIC_df, format = fig_format, caption = "Table 1: WAIC for Different Models and Crimes") %>%
   kable_styling(bootstrap_options = "striped", full_width = F, position = "center")
 waic_table
 
@@ -1088,7 +1087,7 @@ hyper_wide <- hyper_wide %>%
   )
 
 # 4. Create a publication-ready table
-stInt_hyper = kable(hyper_wide, format="latex", booktabs = TRUE, caption = "Table 2:Posterior Summaries of Hyperparameters") %>%
+stInt_hyper = kable(hyper_wide, format=fig_format, booktabs = TRUE, caption = "Table 1: Posterior Summaries of Hyperparameters") %>%
   kable_styling(full_width = FALSE)
 
 stInt_hyper
