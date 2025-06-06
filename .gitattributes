@@ -1,1 +1,2 @@
 report_files/* linguist-vendored
+*.html linguist-generated
