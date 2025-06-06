@@ -14,6 +14,7 @@ We apply Bayesian Hierarchical Models (BHMs) with:
 ## Methodology Highlights
 - **Model Types**: Spatial (S), Spatio-Temporal (ST), and Spatio-Temporal with Interaction (ST+I).
 - **Likelihood**: Poisson models with expected counts as offsets.
+- **Inference**: Bayesian model fitting performed via Integrated Nested Laplace Approximation (INLA) for computationally efficient, fully probabilistic inference.
 - **Priors**: Penalised Complexity (PC) priors on all hyperparameters to avoid overfitting.
 - **Model Comparison**: WAIC was used for model selection and sensitivity analysis across three prior settings.
 
