@@ -1,0 +1,4 @@
+"Model","DIC","WAIC"
+"Spatial only",675.646993548509,658.059795890354
+"Space-time without interaction",6595.75845638214,6653.74666358825
+"Space-time with Type I interaction",6328.31354858566,6318.69324894079
